@@ -1,11 +1,6 @@
 import { registerAs } from "@nestjs/config";
 import { DatabaseConfig } from "./database-config.type";
-import {
-  IsOptional,
-  IsInt,
-  IsString,
-  IsBoolean,
-} from "class-validator";
+import { IsOptional, IsInt, IsString, IsBoolean } from "class-validator";
 import validateConfig from "../../../utils/validate-config";
 
 class EnvironmentVariablesValidator {
@@ -36,20 +31,23 @@ class EnvironmentVariablesValidator {
 export default registerAs<DatabaseConfig>("database", () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
+  const isSslEnabled = process.env.DATABASE_SSL_ENABLED === "true";
+
   return {
     type: "postgres",
+    url: process.env.DATABASE_URL,
     host: process.env.DATABASE_HOST,
     port: parseInt(process.env.DATABASE_PORT || "5432"),
-    password: process.env.DATABASE_PASSWORD,
-    name: process.env.DATABASE_NAME || "test",
     username: process.env.DATABASE_USERNAME,
+    password: process.env.DATABASE_PASSWORD,
+    name: process.env.DATABASE_NAME,
     synchronize: process.env.DATABASE_SYNCHRONIZE === "true",
-    sslEnabled: process.env.DATABASE_SSL_ENABLED === "true",
-    rejectUnauthorized: process.env.DATABASE_REJECT_UNAUTHORIZED === "false",
-    ca: process.env.DATABASE_CA,
-    key: process.env.DATABASE_KEY,
-    cert: process.env.DATABASE_CERT,
     maxConnections: parseInt(process.env.DATABASE_MAX_CONNECTIONS || "10"),
-    logging: true,
+    logging: process.env.NODE_ENV !== "production", // Tắt log ở production
+    ssl: isSslEnabled
+      ? {
+          rejectUnauthorized: false, // Bắt buộc khi deploy trên cloud
+        }
+      : false,
   };
 });

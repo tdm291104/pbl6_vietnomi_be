@@ -7,6 +7,7 @@ import { TypeOrmConfigService } from "./common/database/typeorm-config.service";
 import { DataSource, DataSourceOptions } from "typeorm";
 import { SampleModule } from "./api/sample/sample.module";
 import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware";
+import { UserModule } from "./api/user/user.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware"
       },
     }),
     SampleModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],
