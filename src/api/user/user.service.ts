@@ -6,12 +6,18 @@ import {
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { DeepPartial } from "typeorm";
+import { DeepPartial, ILike, Repository } from "typeorm";
 import { Users } from "src/entities";
 import { hashSync } from "bcryptjs";
 import { log } from "console";
+import { InjectRepository } from "@nestjs/typeorm";
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(Users)
+    private readonly userRepository: Repository<Users>
+  ) {}
+
   async checkExistEmail(email: string): Promise<boolean> {
     const user = await Users.findOneBy({ email });
     if (user) {
@@ -55,9 +61,38 @@ export class UserService {
     return user;
   }
 
-  async findAll() {
-    const users = await Users.find();
-    return users;
+  async findAll(keyWord?: string, page = 1, limit = 10) {
+    page = Number(page);
+    limit = Number(limit);
+    const skip = (page - 1) * limit;
+
+    const where = keyWord
+      ? [
+          { first_name: ILike(`%${keyWord}%`) },
+          { last_name: ILike(`%${keyWord}%`) },
+          { username: ILike(`%${keyWord}%`) },
+          { email: ILike(`%${keyWord}%`) },
+        ]
+      : {};
+
+    const [users, totalItems] = await this.userRepository.findAndCount({
+      where,
+      skip,
+      take: limit,
+      order: { id: "ASC" }, // có thể thay đổi theo yêu cầu
+    });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      data: users,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize: limit,
+      },
+    };
   }
 
   async findOne(id: number) {
@@ -84,7 +119,14 @@ export class UserService {
   }
 
   async remove(id: number) {
-    await Users.delete(id);
-    return { message: `This action removes a #${id} user` };
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    user.delFlag = true;
+    await this.userRepository.save(user);
+
+    return { message: `User with ID ${id} has been soft deleted` };
   }
 }

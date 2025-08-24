@@ -10,7 +10,7 @@ import {
 } from "../../../test/utils/utils";
 import { DataSource } from "typeorm/data-source/DataSource";
 
-describe("SampleController", () => {
+describe("UserController", () => {
   let app: INestApplication;
   let dataSource: DataSource;
 
@@ -29,11 +29,11 @@ describe("SampleController", () => {
     await app.close();
   });
 
-  describe("GET /sample (findAll)", () => {
-    it("should return all samples", async () => {
-      const result = await request(app.getHttpServer()).get("/sample");
+  describe("GET /user (findAll)", () => {
+    it("should return all users", async () => {
+      const result = await request(app.getHttpServer()).get("/user");
 
-      expect(result.body.message).toEqual("This action returns all sample");
+      expect(result.body.message).toEqual("This action returns all user");
     });
   });
 });
