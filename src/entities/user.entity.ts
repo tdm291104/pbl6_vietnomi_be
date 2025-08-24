@@ -38,6 +38,9 @@ export class Users extends BaseEntity {
   @Column({ type: "varchar", length: 50, nullable: false })
   role: UserRole;
 
+  @Column({ type: "boolean", default: false, nullable: false })
+  delFlag: boolean;
+
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
