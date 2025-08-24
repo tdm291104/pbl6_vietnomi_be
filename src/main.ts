@@ -11,8 +11,8 @@ async function bootstrap() {
     cors: {
       origin: true,
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     },
   });
 
@@ -21,7 +21,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   );
   app.enableVersioning({
     type: VersioningType.URI,
@@ -38,7 +38,7 @@ async function bootstrap() {
         bearerFormat: "JWT",
         in: "header",
       },
-      "token",
+      "token"
     )
     .addSecurityRequirements("token")
     .build();
@@ -52,6 +52,7 @@ async function bootstrap() {
     },
   });
   const port = process.env.PORT || 5000;
+  app.getHttpAdapter().getInstance().disable("etag");
   await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(`📚 Swagger documentation: http://localhost:${port}/api`);

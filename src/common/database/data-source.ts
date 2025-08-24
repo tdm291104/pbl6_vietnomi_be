@@ -1,4 +1,3 @@
-
 import { DataSource } from "typeorm";
 import "dotenv/config";
 
@@ -15,6 +14,6 @@ export default new DataSource({
     max: process.env.DATABASE_MAX_CONNECTIONS
       ? parseInt(process.env.DATABASE_MAX_CONNECTIONS, 10)
       : 100,
-    ssl: false,
   },
+  ssl: true, // Enable SSL if required
 });
