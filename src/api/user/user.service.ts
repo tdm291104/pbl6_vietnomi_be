@@ -125,6 +125,7 @@ export class UserService {
     }
 
     user.delFlag = true;
+    user.deletedAt = new Date();
     await this.userRepository.save(user);
 
     return { message: `User with ID ${id} has been soft deleted` };

@@ -17,10 +17,10 @@ export class Users extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   first_name: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   last_name: string;
 
   @Column({ type: "varchar", length: 50, nullable: false })
@@ -32,7 +32,7 @@ export class Users extends BaseEntity {
   @Column({ type: "varchar", length: 255, nullable: false })
   password_hash: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   avatar_url: string;
 
   @Column({ type: "varchar", length: 50, nullable: false })
