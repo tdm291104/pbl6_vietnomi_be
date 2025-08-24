@@ -8,6 +8,7 @@ import { DataSource, DataSourceOptions } from "typeorm";
 import { SampleModule } from "./api/sample/sample.module";
 import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware";
 import { UserModule } from "./api/user/user.module";
+import { AuthModule } from "./api/auth/auth.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from "./api/user/user.module";
     }),
     SampleModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
