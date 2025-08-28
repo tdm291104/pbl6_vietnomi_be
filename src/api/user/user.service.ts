@@ -11,6 +11,8 @@ import { Users } from "src/entities";
 import { hashSync } from "bcryptjs";
 import { log } from "console";
 import { InjectRepository } from "@nestjs/typeorm";
+import { GetUserDto } from "./dto/get-user.dto";
+import { plainToInstance } from "class-transformer";
 @Injectable()
 export class UserService {
   constructor(
@@ -79,13 +81,17 @@ export class UserService {
       where,
       skip,
       take: limit,
-      order: { id: "ASC" }, // có thể thay đổi theo yêu cầu
+      order: { id: "DESC" },
     });
 
     const totalPages = Math.ceil(totalItems / limit);
 
+    const userDtos = plainToInstance(GetUserDto, users, {
+      excludeExtraneousValues: true,
+    });
+
     return {
-      data: users,
+      data: userDtos,
       pagination: {
         totalItems,
         totalPages,

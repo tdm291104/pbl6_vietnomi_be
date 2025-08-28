@@ -36,7 +36,7 @@ export class IngredientService {
         where,
         skip,
         take: limit,
-        order: { id: "ASC" }, // có thể thay đổi theo yêu cầu
+        order: { id: "DESC" }, // có thể thay đổi theo yêu cầu
       });
 
     const totalPages = Math.ceil(totalItems / limit);
