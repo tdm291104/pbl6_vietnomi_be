@@ -8,7 +8,7 @@ import { RegisterAuthDto } from "./dto/register-auth.dto";
 import { UpdateUserDto } from "./dto/update-auth.dto";
 import { DeepPartial, ILike, Repository } from "typeorm";
 import { UserRole, Users } from "src/entities";
-import { compare } from "bcryptjs";
+import { compare, hashSync } from "bcryptjs";
 import { log } from "console";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LoginAuthDto } from "./dto/login-auth.dto";
@@ -142,12 +142,14 @@ export class AuthService {
       };
     }
 
+    let password_hash = hashSync(password, 10);
+
     const newUser = this.userRepository.create({
       first_name,
       last_name,
       username,
       email,
-      password_hash: password,
+      password_hash,
       role: UserRole.USER,
     });
 

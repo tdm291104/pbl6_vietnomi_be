@@ -19,16 +19,21 @@ yarn add $NAME_LIB
 ## DB interaction
 
 - Create migrations:
+
 ```
 yarn db:migrate:generate src/migrations/AddNewEntity
 ```
+
 Replace
 
 - Update database:
+
 ```
 yarn db:migrate:up
 ```
+
 - Revert change:
+
 ```
 yarn db:migrate:down
 ```
@@ -39,7 +44,6 @@ yarn db:migrate:down
 yarn start
 ```
 
-
 ## Entities
 
 To better manage entites aka database table, create/update entities in src/entities
@@ -47,5 +51,5 @@ To better manage entites aka database table, create/update entities in src/entit
 And run migration `yarn db:migrate:generate ...`, `yarn db:migrate:up`.
 
 ## Test
-Use integration test. Read src/api/sample/sample.controller.spec.ts
 
+Use integration test. Read src/api/sample/sample.controller.spec.ts
