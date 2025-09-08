@@ -7,13 +7,17 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiQuery } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("user")
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth("token")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
