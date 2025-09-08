@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
-import { SampleModule } from "./sample.module";
+import { IngredientModule } from "./ingredient.module";
 import {
   clearDB,
   getSynchronizeConnection,
@@ -10,14 +10,14 @@ import {
 } from "../../../test/utils/utils";
 import { DataSource } from "typeorm/data-source/DataSource";
 
-describe("SampleController", () => {
+describe("IngredientController", () => {
   let app: INestApplication;
   let dataSource: DataSource;
 
   beforeAll(async () => {
     dataSource = await getSynchronizeConnection();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [...IMPORT_MODULES, SampleModule],
+      imports: [...IMPORT_MODULES, IngredientModule],
     }).compile();
 
     app = await initAppFromModule(module);
@@ -29,11 +29,11 @@ describe("SampleController", () => {
     await app.close();
   });
 
-  describe("GET /sample (findAll)", () => {
-    it("should return all samples", async () => {
-      const result = await request(app.getHttpServer()).get("/sample");
+  describe("GET /ingredient (findAll)", () => {
+    it("should return all ingredients", async () => {
+      const result = await request(app.getHttpServer()).get("/ingredient");
 
-      expect(result.body.message).toEqual("This action returns all sample");
+      expect(result.body.message).toEqual("This action returns all ingredient");
     });
   });
 });

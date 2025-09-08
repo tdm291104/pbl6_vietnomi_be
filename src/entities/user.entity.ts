@@ -41,6 +41,15 @@ export class Users extends BaseEntity {
   @Column({ type: "boolean", default: false, nullable: false })
   delFlag: boolean;
 
+  @Column({ type: "varchar", length: 10, nullable: true })
+  otp: string | null;
+
+  @Column({ type: "timestamp", nullable: true })
+  otp_expiry_time: Date | null;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  refreshToken: string;
+
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 

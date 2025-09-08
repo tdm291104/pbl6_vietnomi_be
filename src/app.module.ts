@@ -4,11 +4,11 @@ import appConfig from "./common/config/app.config";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { TypeOrmConfigService } from "./common/database/typeorm-config.service";
-import { DataSource, DataSourceOptions } from "typeorm";
-import { SampleModule } from "./api/sample/sample.module";
+import { DataSource, DataSourceOptions, In } from "typeorm";
 import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware";
 import { UserModule } from "./api/user/user.module";
 import { AuthModule } from "./api/auth/auth.module";
+import { IngredientModule } from "./api/ingredient/ingredient.module";
 
 @Module({
   imports: [
@@ -23,9 +23,9 @@ import { AuthModule } from "./api/auth/auth.module";
         return new DataSource(options).initialize();
       },
     }),
-    SampleModule,
     UserModule,
     AuthModule,
+    IngredientModule,
   ],
   controllers: [],
   providers: [],
