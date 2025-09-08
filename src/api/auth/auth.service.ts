@@ -74,8 +74,20 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async verifyToken(token: string): Promise<PayloadTokenDto | null> {
+  async verifyToken(
+    token: string,
+    refresh: boolean = false
+  ): Promise<PayloadTokenDto | null> {
     try {
+      if (refresh) {
+        if (!process.env.AUTH_JWT_REFRESH_SECRET) {
+          throw new Error(
+            "JWT refresh secret is not defined in environment variables."
+          );
+        }
+        const decoded = verify(token, process.env.AUTH_JWT_REFRESH_SECRET);
+        return decoded as PayloadTokenDto;
+      }
       if (!process.env.AUTH_JWT_SECRET) {
         throw new Error("JWT secret is not defined in environment variables.");
       }
@@ -99,9 +111,12 @@ export class AuthService {
     });
   }
 
-  async validateRefreshToken(token: string): Promise<PayloadTokenDto> {
+  async validateRefreshToken(
+    token: string,
+    refresh: boolean = false
+  ): Promise<PayloadTokenDto> {
     try {
-      const payload = await this.verifyToken(token);
+      const payload = await this.verifyToken(token, refresh);
       if (!payload) {
         throw new UnauthorizedException(
           "Refresh token has expired or is invalid."

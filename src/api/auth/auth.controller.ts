@@ -19,6 +19,7 @@ import { VerifyOtpDto } from "./dto/verify-otp.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { PayloadTokenDto } from "./dto/payload-token.dto";
+import { ref } from "process";
 
 @Controller("auth")
 export class AuthController {
@@ -64,7 +65,7 @@ export class AuthController {
 
     try {
       const decoded: PayloadTokenDto =
-        await this.authService.validateRefreshToken(refreshToken);
+        await this.authService.validateRefreshToken(refreshToken, true);
 
       const user = await this.authService.getUserByRefreshToken(refreshToken);
 
@@ -72,8 +73,9 @@ export class AuthController {
         throw new UnauthorizedException("Invalid refresh token");
       }
 
-      const newTokens = await this.authService.generateToken(user);
-      return newTokens;
+      const newTokens = (await this.authService.generateToken(user))
+        .accessToken;
+      return { data: newTokens };
     } catch (e) {
       throw new UnauthorizedException("Invalid refresh token");
     }

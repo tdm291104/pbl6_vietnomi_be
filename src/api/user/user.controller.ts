@@ -14,6 +14,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { log } from "console";
 
 @Controller("user")
 @UseGuards(JwtAuthGuard)
@@ -45,6 +46,7 @@ export class UserController {
 
   @Patch(":id")
   update(@Param("id") id: string, @Body() updateuserDto: UpdateUserDto) {
+    log("updateuserDto", updateuserDto);
     return this.userService.update(+id, updateuserDto);
   }
 
