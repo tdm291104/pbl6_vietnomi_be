@@ -5,7 +5,6 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { TypeOrmConfigService } from "./common/database/typeorm-config.service";
 import { DataSource, DataSourceOptions, In } from "typeorm";
-import { SampleModule } from "./api/sample/sample.module";
 import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware";
 import { UserModule } from "./api/user/user.module";
 import { AuthModule } from "./api/auth/auth.module";
@@ -24,7 +23,6 @@ import { IngredientModule } from "./api/ingredient/ingredient.module";
         return new DataSource(options).initialize();
       },
     }),
-    SampleModule,
     UserModule,
     AuthModule,
     IngredientModule,

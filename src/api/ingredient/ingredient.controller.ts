@@ -7,13 +7,17 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { IngredientService } from "./ingredient.service";
 import { CreateIngredientDto } from "./dto/create-ingredient.dto";
 import { UpdateIngredientDto } from "./dto/update-ingredient.dto";
-import { ApiQuery } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("ingredient")
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth("token")
 export class IngredientController {
   constructor(private readonly ingredientService: IngredientService) {}
 
