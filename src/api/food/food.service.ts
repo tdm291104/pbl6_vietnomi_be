@@ -1,16 +1,9 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateFoodDto } from "./dto/create-food.dto";
 import { UpdateFoodDto } from "./dto/update-food.dto";
-import { ILike, Repository } from "typeorm";
+import { ILike, IsNull, Not, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Foods } from "src/entities/food.entity";
-import * as fs from "fs";
-import * as csv from "csv-parser";
 
 @Injectable()
 export class FoodService {
@@ -30,8 +23,12 @@ export class FoodService {
     limit = Number(limit);
     const skip = (page - 1) * limit;
 
-    const where = keyWord ? [{ name: ILike(`%${keyWord}%`) }] : {};
-
+    const where = keyWord
+      ? {
+          dish_name: ILike(`%${keyWord}%`),
+          deletedAt: IsNull(),
+        }
+      : { deletedAt: IsNull() };
     const [foods, totalItems] = await this.foodRepository.findAndCount({
       where,
       skip,
@@ -53,7 +50,7 @@ export class FoodService {
   }
 
   async findOne(id: number) {
-    const food = await Foods.findOneBy({ id });
+    const food = await Foods.findOneBy({ id, deletedAt: IsNull() });
     if (!food) {
       throw new NotFoundException(`user with id ${id} not found`);
     }
