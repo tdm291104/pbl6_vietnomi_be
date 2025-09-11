@@ -70,12 +70,12 @@ export class UserService {
 
     const where = keyWord
       ? [
-          { first_name: ILike(`%${keyWord}%`) },
-          { last_name: ILike(`%${keyWord}%`) },
-          { username: ILike(`%${keyWord}%`) },
-          { email: ILike(`%${keyWord}%`) },
+          { first_name: ILike(`%${keyWord}%`), delFlag: false },
+          { last_name: ILike(`%${keyWord}%`), delFlag: false },
+          { username: ILike(`%${keyWord}%`), delFlag: false },
+          { email: ILike(`%${keyWord}%`), delFlag: false },
         ]
-      : {};
+      : { delFlag: false };
 
     const [users, totalItems] = await this.userRepository.findAndCount({
       where,
@@ -109,23 +109,31 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateuserDto: UpdateUserDto) {
-    console.log("updateuserDto", updateuserDto);
-    let password = updateuserDto.password;
-    if (password) {
-      password = hashSync(password, 10);
-    }
+  async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
     if (!user) {
-      throw new Error(`user with id ${id} not found`);
+      throw new NotFoundException(`User with id ${id} not found`);
     }
-    Object.assign(user, { ...updateuserDto, password_hash: password });
-    await user.save();
-    return user;
+
+    if (updateUserDto.password) {
+      const hashedPassword = await hashSync(updateUserDto.password, 10);
+      user.password_hash = hashedPassword;
+    }
+
+    // Lọc các field được phép update
+    const { password, ...rest } = updateUserDto;
+    Object.assign(user, rest);
+
+    user.updatedAt = new Date();
+
+    return await this.userRepository.save(user);
   }
 
   async remove(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const result: ResponseInfo = { message: "", code: 200, data: null };
+    const user = await this.userRepository.findOne({
+      where: { id, delFlag: false },
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -133,7 +141,8 @@ export class UserService {
     user.delFlag = true;
     user.deletedAt = new Date();
     await this.userRepository.save(user);
+    result.message = `User with ID ${id} has been soft deleted`;
 
-    return { message: `User with ID ${id} has been soft deleted` };
+    return result;
   }
 }

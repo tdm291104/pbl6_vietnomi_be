@@ -8,7 +8,7 @@ import { DataSource, DataSourceOptions, In } from "typeorm";
 import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware";
 import { UserModule } from "./api/user/user.module";
 import { AuthModule } from "./api/auth/auth.module";
-import { IngredientModule } from "./api/ingredient/ingredient.module";
+import { TagModule } from "./api/tag/tag.module";
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { IngredientModule } from "./api/ingredient/ingredient.module";
     }),
     UserModule,
     AuthModule,
-    IngredientModule,
+    TagModule,
   ],
   controllers: [],
   providers: [],
