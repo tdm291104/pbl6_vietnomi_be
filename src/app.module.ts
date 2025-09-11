@@ -9,6 +9,7 @@ import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware"
 import { UserModule } from "./api/user/user.module";
 import { AuthModule } from "./api/auth/auth.module";
 import { TagModule } from "./api/tag/tag.module";
+import { FoodModule } from "./api/food/food.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TagModule } from "./api/tag/tag.module";
     UserModule,
     AuthModule,
     TagModule,
+    FoodModule,
   ],
   controllers: [],
   providers: [],
