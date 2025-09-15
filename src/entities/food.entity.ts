@@ -7,7 +7,7 @@ import {
   BaseEntity,
   ForeignKey,
 } from "typeorm";
-import { Tags } from "./tag.entity";
+import { Users } from "./user.entity";
 
 @Entity("foods")
 export class Foods extends BaseEntity {
@@ -52,6 +52,13 @@ export class Foods extends BaseEntity {
 
   @Column({ type: "varchar", length: 255, nullable: true })
   image_link: string;
+
+  @Column({ type: "boolean", default: false, nullable: false })
+  delFlag: boolean;
+
+  @ForeignKey(() => Users)
+  @Column({ type: "int", default: 1, nullable: false })
+  user_id: number;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;

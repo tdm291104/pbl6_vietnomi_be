@@ -18,6 +18,9 @@ export class Tags extends BaseEntity {
   @Column({ type: "varchar", length: 255, nullable: false })
   image_url: string;
 
+  @Column({ type: "boolean", default: false, nullable: false })
+  delFlag: boolean;
+
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 

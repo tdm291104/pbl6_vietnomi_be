@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateFoodDto } from "./dto/create-food.dto";
 import { UpdateFoodDto } from "./dto/update-food.dto";
-import { ILike, IsNull, Not, Repository } from "typeorm";
+import { ILike, IsNull, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Foods } from "src/entities/food.entity";
 
@@ -26,9 +26,9 @@ export class FoodService {
     const where = keyWord
       ? {
           dish_name: ILike(`%${keyWord}%`),
-          deletedAt: IsNull(),
+          delFlag: false,
         }
-      : { deletedAt: IsNull() };
+      : { delFlag: false };
     const [foods, totalItems] = await this.foodRepository.findAndCount({
       where,
       skip,
@@ -50,9 +50,9 @@ export class FoodService {
   }
 
   async findOne(id: number) {
-    const food = await Foods.findOneBy({ id, deletedAt: IsNull() });
+    const food = await Foods.findOneBy({ id, delFlag: false });
     if (!food) {
-      throw new NotFoundException(`user with id ${id} not found`);
+      throw new NotFoundException(`Food with id ${id} not found`);
     }
     return food;
   }
@@ -60,7 +60,7 @@ export class FoodService {
   async update(id: number, updateFoodDto: UpdateFoodDto) {
     const food = await this.findOne(id);
     if (!food) {
-      throw new Error(`user with id ${id} not found`);
+      throw new Error(`Food with id ${id} not found`);
     }
     Object.assign(food, updateFoodDto);
     await food.save();
@@ -76,6 +76,7 @@ export class FoodService {
     }
 
     food.deletedAt = new Date();
+    food.delFlag = true;
     await this.foodRepository.save(food);
 
     return { message: `Food with ID ${id} has been soft deleted` };
