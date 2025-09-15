@@ -3,10 +3,11 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  Res,
 } from "@nestjs/common";
 import { CreateTagDto } from "./dto/create-tag.dto";
 import { UpdateTagDto } from "./dto/update-tag.dto";
-import { DeepPartial, ILike, Repository } from "typeorm";
+import { DeepPartial, ILike, IsNull, Repository } from "typeorm";
 import { hashSync } from "bcryptjs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Tags } from "src/entities/tag.entity";
@@ -28,7 +29,12 @@ export class TagService {
     limit = Number(limit);
     const skip = (page - 1) * limit;
 
-    const where = keyWord ? [{ name: ILike(`%${keyWord}%`) }] : {};
+    const where = keyWord
+      ? {
+          name: ILike(`%${keyWord}%`),
+          delFlag: false,
+        }
+      : { delFlag: false };
 
     const [tags, totalItems] = await this.tagRepository.findAndCount({
       where,
@@ -51,9 +57,9 @@ export class TagService {
   }
 
   async findOne(id: number) {
-    const tag = await Tags.findOneBy({ id });
+    const tag = await Tags.findOneBy({ id, delFlag: false });
     if (!tag) {
-      throw new NotFoundException(`user with id ${id} not found`);
+      throw new NotFoundException(`Tag with id ${id} not found`);
     }
     return tag;
   }
@@ -61,11 +67,17 @@ export class TagService {
   async update(id: number, updateTagDto: UpdateTagDto) {
     const tag = await this.findOne(id);
     if (!tag) {
-      throw new Error(`user with id ${id} not found`);
+      throw new Error(`Tag with id ${id} not found`);
     }
+    const result: ResponseInfo = { message: "", code: 200, data: null };
+
+    tag.updatedAt = new Date();
     Object.assign(tag, updateTagDto);
-    await tag.save();
-    return tag;
+    await this.tagRepository.save(tag);
+    result.message = `Tag with ID ${id} updated successfully`;
+    result.data = tag;
+
+    return result;
   }
 
   async remove(id: number) {
@@ -76,9 +88,13 @@ export class TagService {
       throw new NotFoundException(`Tag with ID ${id} not found`);
     }
 
-    tag.deletedAt = new Date();
-    await this.tagRepository.save(tag);
+    const result: ResponseInfo = { message: "", code: 200, data: null };
 
-    return { message: `Tag with ID ${id} has been soft deleted` };
+    tag.deletedAt = new Date();
+    tag.delFlag = true;
+    await this.tagRepository.save(tag);
+    result.message = `Tag with ID ${id} has been soft deleted`;
+    result.data = tag;
+    return result;
   }
 }
