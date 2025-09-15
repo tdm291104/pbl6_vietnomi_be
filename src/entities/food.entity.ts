@@ -56,6 +56,9 @@ export class Foods extends BaseEntity {
   @Column({ type: "boolean", default: false, nullable: false })
   delFlag: boolean;
 
+  @Column({ type: "boolean", default: false, nullable: false })
+  posted: boolean;
+
   @ForeignKey(() => Users)
   @Column({ type: "int", default: 1, nullable: false })
   user_id: number;
