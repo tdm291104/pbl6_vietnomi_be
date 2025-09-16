@@ -12,6 +12,7 @@ import { TagModule } from "./api/tag/tag.module";
 import { FoodModule } from "./api/food/food.module";
 import { FoodTagModule } from "./api/food-tag/food-tag.module";
 import { CommentModule } from "./api/comment/comment.module";
+import { RatingModule } from "./api/rating/rating.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CommentModule } from "./api/comment/comment.module";
     FoodModule,
     FoodTagModule,
     CommentModule,
+    RatingModule,
   ],
   controllers: [],
   providers: [],
