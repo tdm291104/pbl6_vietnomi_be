@@ -10,6 +10,7 @@ import { UserModule } from "./api/user/user.module";
 import { AuthModule } from "./api/auth/auth.module";
 import { TagModule } from "./api/tag/tag.module";
 import { FoodModule } from "./api/food/food.module";
+import { FoodTagModule } from "./api/food-tag/food-tag.module";
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FoodModule } from "./api/food/food.module";
     AuthModule,
     TagModule,
     FoodModule,
+    FoodTagModule,
   ],
   controllers: [],
   providers: [],
