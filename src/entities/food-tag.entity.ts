@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   BaseEntity,
   ForeignKey,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { Foods } from "./food.entity";
 import { Tags } from "./tag.entity";
@@ -15,13 +17,13 @@ export class FoodTag extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ForeignKey(() => Foods)
-  @Column({ type: "int", nullable: false })
-  food_id: number;
+  @ManyToOne(() => Foods, (foods) => foods.foodTags)
+  @JoinColumn({ name: "food_id" })
+  food: Foods;
 
-  @ForeignKey(() => Tags)
-  @Column({ type: "int", nullable: false })
-  tag_id: number;
+  @ManyToOne(() => Tags, (tags) => tags.tagTags)
+  @JoinColumn({ name: "tag_id" })
+  tag: Tags;
 
   @Column({ type: "boolean", default: false, nullable: false })
   delFlag: boolean;

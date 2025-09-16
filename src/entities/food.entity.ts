@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   BaseEntity,
   ForeignKey,
+  OneToMany,
 } from "typeorm";
 import { Users } from "./user.entity";
+import { FoodTag } from "./food-tag.entity";
 
 @Entity("foods")
 export class Foods extends BaseEntity {
@@ -75,4 +77,7 @@ export class Foods extends BaseEntity {
 
   @Column({ type: "timestamp", nullable: true })
   deletedAt: Date | null;
+
+  @OneToMany(() => FoodTag, (foodTag) => foodTag.food)
+  foodTags: FoodTag[];
 }
