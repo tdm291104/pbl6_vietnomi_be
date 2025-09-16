@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber } from "class-validator";
 
 export class CreateFoodTagDto {
   @ApiProperty({ example: 1 })
@@ -7,8 +7,9 @@ export class CreateFoodTagDto {
   @IsNotEmpty()
   food_id: number;
 
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsNotEmpty()
-  tag_id: number;
+  @ApiProperty({ example: [1, 2, 3] })
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @ArrayMinSize(1)
+  tag_ids: number[];
 }

@@ -4,6 +4,7 @@ import { UpdateFoodDto } from "./dto/update-food.dto";
 import { ILike, IsNull, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Foods } from "src/entities/food.entity";
+import { FoodTag } from "src/entities";
 
 @Injectable()
 export class FoodService {

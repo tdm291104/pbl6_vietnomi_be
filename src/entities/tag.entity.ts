@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
+  OneToMany,
 } from "typeorm";
+import { FoodTag } from "./food-tag.entity";
 
 @Entity("tags")
 export class Tags extends BaseEntity {
@@ -33,4 +35,7 @@ export class Tags extends BaseEntity {
 
   @Column({ type: "timestamp", nullable: true })
   deletedAt: Date | null;
+
+  @OneToMany(() => FoodTag, (foodTag) => foodTag.tag)
+  tagTags: FoodTag[];
 }
