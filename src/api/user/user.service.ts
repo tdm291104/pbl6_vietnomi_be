@@ -37,112 +37,190 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const isEmailExist = await this.checkExistEmail(createUserDto.email);
-    if (isEmailExist) {
-      throw new HttpException(
-        `Email already exists`,
-        HttpStatus.CONFLICT // 409
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+    }) as ResponseInfo;
+
+    try {
+      const isEmailExist = await this.checkExistEmail(createUserDto.email);
+      if (isEmailExist) {
+        result.code = HttpStatus.CONFLICT;
+        result.message = `Email already exists`;
+        return result;
+      }
+      const isUsernameExist = await this.checkExistUsername(
+        createUserDto.username
       );
-    }
-    const isUsernameExist = await this.checkExistUsername(
-      createUserDto.username
-    );
-    if (isUsernameExist) {
-      throw new HttpException(`Username already exists`, HttpStatus.CONFLICT);
-    }
+      if (isUsernameExist) {
+        result.code = HttpStatus.CONFLICT;
+        result.message = `Username already exists`;
+        return result;
+      }
 
-    let password = createUserDto.password;
-    if (password) {
-      password = hashSync(password, 10);
-    }
+      let password = createUserDto.password;
+      if (password) {
+        password = hashSync(password, 10);
+      }
 
-    const user = await Users.create({
-      ...createUserDto,
-      password_hash: password,
-    } as DeepPartial<Users>).save();
-    return user;
+      const user = await Users.create({
+        ...createUserDto,
+        password_hash: password,
+      } as DeepPartial<Users>).save();
+
+      result.data = user;
+      result.message = "Create user successfully";
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Create user failed";
+      return result;
+    }
   }
 
   async findAll(keyWord?: string, page = 1, limit = 10) {
-    page = Number(page);
-    limit = Number(limit);
-    const skip = (page - 1) * limit;
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
 
-    const where = keyWord
-      ? [
-          { first_name: ILike(`%${keyWord}%`), delFlag: false },
-          { last_name: ILike(`%${keyWord}%`), delFlag: false },
-          { username: ILike(`%${keyWord}%`), delFlag: false },
-          { email: ILike(`%${keyWord}%`), delFlag: false },
-        ]
-      : { delFlag: false };
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
 
-    const [users, totalItems] = await this.userRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { id: "DESC" },
-    });
+      const where = keyWord
+        ? [
+            { first_name: ILike(`%${keyWord}%`), delFlag: false },
+            { last_name: ILike(`%${keyWord}%`), delFlag: false },
+            { username: ILike(`%${keyWord}%`), delFlag: false },
+            { email: ILike(`%${keyWord}%`), delFlag: false },
+          ]
+        : { delFlag: false };
 
-    const totalPages = Math.ceil(totalItems / limit);
+      const [users, totalItems] = await this.userRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" },
+      });
 
-    const userDtos = plainToInstance(GetUserDto, users, {
-      excludeExtraneousValues: true,
-    });
+      const totalPages = Math.ceil(totalItems / limit);
 
-    return {
-      data: userDtos,
-      pagination: {
+      const userDtos = plainToInstance(GetUserDto, users, {
+        excludeExtraneousValues: true,
+      });
+
+      result.message = "Get users successfully";
+      result.data = userDtos;
+      result.pagination = {
         totalItems,
         totalPages,
         currentPage: page,
         pageSize: limit,
-      },
-    };
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get users failed";
+      return result;
+    }
   }
 
   async findOne(id: number) {
-    const user = await Users.findOneBy({ id });
-    if (!user) {
-      throw new NotFoundException(`user with id ${id} not found`);
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const user = await Users.findOneBy({ id });
+      if (!user) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `User with id ${id} not found`;
+        return result;
+      }
+
+      result.data = user;
+      result.message = "Get user successfully";
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get user failed";
+      return result;
     }
-    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const user = await this.userRepository.findOneBy({ id, delFlag: false });
+      if (!user) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `User with id ${id} not found`;
+        return result;
+      }
+
+      if (updateUserDto.password) {
+        const hashedPassword = await hashSync(updateUserDto.password, 10);
+        user.password_hash = hashedPassword;
+      }
+
+      // Lọc các field được phép update
+      const { password, ...rest } = updateUserDto;
+      Object.assign(user, rest);
+
+      user.updatedAt = new Date();
+
+      await this.userRepository.save(user);
+      result.data = user;
+      result.message = "Update user successful";
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Update user failed";
+      return result;
     }
-
-    if (updateUserDto.password) {
-      const hashedPassword = await hashSync(updateUserDto.password, 10);
-      user.password_hash = hashedPassword;
-    }
-
-    // Lọc các field được phép update
-    const { password, ...rest } = updateUserDto;
-    Object.assign(user, rest);
-
-    user.updatedAt = new Date();
-
-    return await this.userRepository.save(user);
   }
 
   async remove(id: number) {
-    const result: ResponseInfo = { message: "", code: 200, data: null };
-    const user = await this.userRepository.findOne({
-      where: { id, delFlag: false },
-    });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+    const result: ResponseInfo = {
+      message: "",
+      code: HttpStatus.OK,
+      data: null,
+    };
+
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id, delFlag: false },
+      });
+      if (!user) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `User with id ${id} not found`;
+        return result;
+      }
+
+      user.delFlag = true;
+      user.deletedAt = new Date();
+      await this.userRepository.save(user);
+
+      result.message = `User with ID ${id} has been soft deleted`;
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Delete user failed";
+      return result;
     }
-
-    user.delFlag = true;
-    user.deletedAt = new Date();
-    await this.userRepository.save(user);
-    result.message = `User with ID ${id} has been soft deleted`;
-
-    return result;
   }
 }
