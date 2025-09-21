@@ -135,6 +135,11 @@ export class AuthService {
   }
 
   async login(loginDto: LoginAuthDto) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+    }) as ResponseInfo;
     const { username, password } = loginDto;
 
     const user = await this.userRepository.findOne({
@@ -142,11 +147,9 @@ export class AuthService {
     });
 
     if (!user) {
-      return {
-        code: HttpStatus.NOT_FOUND,
-        message: "User not found",
-        data: null,
-      };
+      result.code = HttpStatus.NOT_FOUND;
+      result.message = "User not found";
+      return result;
     }
 
     const isPasswordValid = await this.checkPassword(
@@ -154,51 +157,49 @@ export class AuthService {
       user.password_hash
     );
     if (!isPasswordValid) {
-      return {
-        code: HttpStatus.BAD_REQUEST,
-        message: "Password is incorrect",
-        data: null,
-      };
+      result.code = HttpStatus.BAD_REQUEST;
+      result.message = "Password is incorrect";
+      return result;
     }
 
     const { accessToken, refreshToken } = await this.generateToken(user);
 
-    return {
-      code: HttpStatus.OK,
-      message: "Login successful",
-      data: {
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        username: user.username,
-        email: user.email,
-        avatar_url: user.avatar_url,
-        role: user.role,
-        token: accessToken,
-        refreshToken: refreshToken,
-      },
+    result.code = HttpStatus.OK;
+    result.message = "Login successful";
+    result.data = {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      username: user.username,
+      email: user.email,
+      avatar_url: user.avatar_url,
+      role: user.role,
+      token: accessToken,
+      refreshToken: refreshToken,
     };
+    return result;
   }
 
   async register(registerDto: RegisterAuthDto) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+    }) as ResponseInfo;
     const { first_name, last_name, username, email, password } = registerDto;
 
     const isEmailExist = await this.checkExistEmail(email);
     if (isEmailExist) {
-      return {
-        code: HttpStatus.BAD_REQUEST,
-        message: "Email already exists",
-        data: null,
-      };
+      result.code = HttpStatus.BAD_REQUEST;
+      result.message = "Email already exists";
+      return result;
     }
 
     const isUsernameExist = await this.checkExistUsername(username);
     if (isUsernameExist) {
-      return {
-        code: HttpStatus.BAD_REQUEST,
-        message: "Username already exists",
-        data: null,
-      };
+      result.code = HttpStatus.BAD_REQUEST;
+      result.message = "Username already exists";
+      return result;
     }
 
     let password_hash = hashSync(password, 10);
@@ -214,11 +215,9 @@ export class AuthService {
 
     await this.userRepository.save(newUser);
 
-    return {
-      code: HttpStatus.CREATED,
-      message: "User registered successfully",
-      data: null,
-    };
+    result.code = HttpStatus.CREATED;
+    result.message = "User registered successfully";
+    return result;
   }
 
   async sendOtpEmail(toEmail: string, otp: string) {

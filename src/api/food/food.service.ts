@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateFoodDto } from "./dto/create-food.dto";
 import { UpdateFoodDto } from "./dto/update-food.dto";
 import { ILike, IsNull, Repository } from "typeorm";
@@ -14,117 +14,222 @@ export class FoodService {
   ) {}
 
   async create(createFoodDto: CreateFoodDto, userId: number) {
-    const food = this.foodRepository.create(createFoodDto);
-    food.user_id = userId;
-    food.posted = false;
-    await this.foodRepository.save(food);
-    return food;
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+    try {
+      const food = this.foodRepository.create(createFoodDto);
+      food.user_id = userId;
+      food.posted = false;
+      await this.foodRepository.save(food);
+      result.data = food;
+      result.message = "Create food successfully";
+      return food;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Create food failed";
+      return result;
+    }
   }
 
   async findAll(keyWord?: string, page = 1, limit = 10) {
-    page = Number(page);
-    limit = Number(limit);
-    const skip = (page - 1) * limit;
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
 
-    const where = keyWord
-      ? {
-          dish_name: ILike(`%${keyWord}%`),
-          delFlag: false,
-          posted: true,
-        }
-      : { delFlag: false, posted: true };
-    const [foods, totalItems] = await this.foodRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { id: "DESC" }, // có thể thay đổi theo yêu cầu
-    });
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
 
-    const totalPages = Math.ceil(totalItems / limit);
+      const where = keyWord
+        ? {
+            dish_name: ILike(`%${keyWord}%`),
+            delFlag: false,
+            posted: true,
+          }
+        : { delFlag: false, posted: true };
+      const [foods, totalItems] = await this.foodRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" }, // có thể thay đổi theo yêu cầu
+      });
 
-    return {
-      data: foods,
-      pagination: {
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get foods successfully";
+      result.data = foods;
+      result.pagination = {
         totalItems,
         totalPages,
         currentPage: page,
         pageSize: limit,
-      },
-    };
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get foods failed";
+      return result;
+    }
   }
 
   async findAllFoodNoPosted(keyWord?: string, page = 1, limit = 10) {
-    page = Number(page);
-    limit = Number(limit);
-    const skip = (page - 1) * limit;
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
 
-    const where = keyWord
-      ? {
-          dish_name: ILike(`%${keyWord}%`),
-          delFlag: false,
-          posted: false,
-        }
-      : { delFlag: false, posted: false };
-    const [foods, totalItems] = await this.foodRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { id: "DESC" }, // có thể thay đổi theo yêu cầu
-    });
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
 
-    const totalPages = Math.ceil(totalItems / limit);
+      const where = keyWord
+        ? {
+            dish_name: ILike(`%${keyWord}%`),
+            delFlag: false,
+            posted: false,
+          }
+        : { delFlag: false, posted: false };
+      const [foods, totalItems] = await this.foodRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" },
+      });
 
-    return {
-      data: foods,
-      pagination: {
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get foods successfully";
+      result.data = foods;
+      result.pagination = {
         totalItems,
         totalPages,
         currentPage: page,
         pageSize: limit,
-      },
-    };
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get foods failed";
+      return result;
+    }
   }
 
   async findOne(id: number) {
-    const food = await Foods.findOneBy({ id, delFlag: false, posted: true });
-    if (!food) {
-      throw new NotFoundException(`Food with id ${id} not found`);
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+    try {
+      const food = await Foods.findOneBy({ id, delFlag: false, posted: true });
+      if (!food) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `Food with id ${id} not found`;
+        return result;
+      }
+      result.data = food;
+      result.message = "Get food successfully";
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get food failed";
+      return result;
     }
-    return food;
   }
 
   async post_food(id: number) {
-    const food = await this.foodRepository.findOneBy({ id, delFlag: false });
-    if (!food) {
-      throw new Error(`Food with id ${id} not found`);
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const food = await this.foodRepository.findOneBy({ id, delFlag: false });
+      if (!food) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `Food with id ${id} not found`;
+        return result;
+      }
+      Object.assign(food, { posted: true });
+      await food.save();
+      result.data = food;
+      result.message = `Posted food with id ${id} `;
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Post food failed";
+      return result;
     }
-    Object.assign(food, { posted: true });
-    await food.save();
-    return food;
   }
 
   async update(id: number, updateFoodDto: UpdateFoodDto) {
-    const food = await this.findOne(id);
-    if (!food) {
-      throw new Error(`Food with id ${id} not found`);
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+    try {
+      const food = await this.foodRepository.findOneBy({ id, delFlag: false });
+      if (!food) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `Food with id ${id} not found`;
+        return result;
+      }
+      Object.assign(food, updateFoodDto);
+      await food.save();
+      result.data = food;
+      result.message = "Update food successful";
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Update food failed";
+      return result;
     }
-    Object.assign(food, updateFoodDto);
-    await food.save();
-    return food;
   }
 
   async remove(id: number) {
-    const food = await this.foodRepository.findOne({
-      where: { id },
-    });
-    if (!food) {
-      throw new NotFoundException(`Food with ID ${id} not found`);
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const food = await this.foodRepository.findOne({
+        where: { id },
+      });
+      if (!food) {
+        result.code = HttpStatus.NOT_FOUND;
+        result.message = `Food with id ${id} not found`;
+        return result;
+      }
+
+      food.deletedAt = new Date();
+      food.delFlag = true;
+      await this.foodRepository.save(food);
+
+      result.message = `Food with ID ${id} has been soft deleted`;
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Delete comment failed";
+      return result;
     }
-
-    food.deletedAt = new Date();
-    food.delFlag = true;
-    await this.foodRepository.save(food);
-
-    return { message: `Food with ID ${id} has been soft deleted` };
   }
 }
