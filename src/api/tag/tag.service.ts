@@ -1,16 +1,9 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-  Res,
-} from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { CreateTagDto } from "./dto/create-tag.dto";
 import { UpdateTagDto } from "./dto/update-tag.dto";
-import { DeepPartial, ILike, IsNull, Repository } from "typeorm";
-import { hashSync } from "bcryptjs";
+import { ILike, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Tags } from "src/entities/tag.entity";
+import { Tags } from "../../entities/tag.entity";
 @Injectable()
 export class TagService {
   constructor(

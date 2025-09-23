@@ -16,7 +16,7 @@ import { UpdateFoodDto } from "./dto/update-food.dto";
 import { ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { Request } from "express";
-import { GetUser } from "src/decorators/get-user.decorator";
+import { GetUser } from "../../decorators/get-user.decorator";
 import { PayloadTokenDto } from "../auth/dto/payload-token.dto";
 
 @Controller("food")

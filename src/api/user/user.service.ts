@@ -1,15 +1,9 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { DeepPartial, ILike, Repository } from "typeorm";
-import { Users } from "src/entities";
+import { Users } from "../../entities";
 import { hashSync } from "bcryptjs";
-import { log } from "console";
 import { InjectRepository } from "@nestjs/typeorm";
 import { GetUserDto } from "./dto/get-user.dto";
 import { plainToInstance } from "class-transformer";

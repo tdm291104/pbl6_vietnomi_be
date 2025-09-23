@@ -14,7 +14,7 @@ import { CreateRatingDto } from "./dto/create-rating.dto";
 import { UpdateRatingDto } from "./dto/update-rating.dto";
 import { ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { GetUser } from "src/decorators/get-user.decorator";
+import { GetUser } from "../../decorators/get-user.decorator";
 import { PayloadTokenDto } from "../auth/dto/payload-token.dto";
 
 @Controller("rating")
