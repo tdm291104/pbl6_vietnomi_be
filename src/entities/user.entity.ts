@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
+  OneToMany,
 } from "typeorm";
+import { Comments } from "./comment.entity";
 
 export const enum UserRole {
   ADMIN = "ADMIN",
@@ -62,4 +64,7 @@ export class Users extends BaseEntity {
 
   @Column({ type: "timestamp", nullable: true })
   deletedAt: Date | null;
+
+  @OneToMany(() => Comments, (comment) => comment.user)
+  comments: Comments[];
 }

@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { Users } from "./user.entity";
 import { FoodTag } from "./food-tag.entity";
+import { Comments } from "./comment.entity";
 
 @Entity("foods")
 export class Foods extends BaseEntity {
@@ -80,4 +81,7 @@ export class Foods extends BaseEntity {
 
   @OneToMany(() => FoodTag, (foodTag) => foodTag.food)
   foodTags: FoodTag[];
+
+  @OneToMany(() => Comments, (comment) => comment.food)
+  comments: Comments[];
 }
