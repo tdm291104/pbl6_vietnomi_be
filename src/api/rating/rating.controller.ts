@@ -43,6 +43,46 @@ export class RatingController {
     return this.ratingService.findAll(keyWord, Number(page), Number(limit));
   }
 
+  @Get("food")
+  @ApiQuery({ name: "keyWord", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "foodID", required: false, type: Number })
+  findAllWithFoodID(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Query("foodID") foodID
+  ) {
+    return this.ratingService.findAllWithFoodID(
+      keyWord,
+      Number(page),
+      Number(limit),
+      Number(foodID)
+    );
+  }
+
+  @Get("user")
+  @ApiQuery({ name: "keyWord", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "userID", required: false, type: Number })
+  findAllWithUserID(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Query("userID") userID
+  ) {
+    return this.ratingService.findAllWithUserID(
+      keyWord,
+      Number(page),
+      Number(limit),
+      Number(userID)
+    );
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.ratingService.findOne(+id);

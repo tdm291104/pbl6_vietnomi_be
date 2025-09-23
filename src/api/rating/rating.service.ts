@@ -72,6 +72,94 @@ export class RatingService {
     }
   }
 
+  async findAllWithFoodID(
+    keyWord?: string,
+    page = 1,
+    limit = 10,
+    foodID?: number
+  ) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
+
+      const where = { food_id: foodID, delFlag: false };
+      const [ratings, totalItems] = await this.ratingRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" },
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get ratings successfully";
+      result.data = ratings;
+      result.pagination = {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize: limit,
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get ratings failed";
+      return result;
+    }
+  }
+
+  async findAllWithUserID(
+    keyWord?: string,
+    page = 1,
+    limit = 10,
+    userID?: number
+  ) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
+
+      const where = { user_id: userID, delFlag: false };
+      const [ratings, totalItems] = await this.ratingRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" },
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get ratings successfully";
+      result.data = ratings;
+      result.pagination = {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize: limit,
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get ratings failed";
+      return result;
+    }
+  }
+
   async findOne(id: number) {
     const result: ResponseInfo = new Object({
       code: HttpStatus.OK,
