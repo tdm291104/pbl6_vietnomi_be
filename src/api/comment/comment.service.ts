@@ -77,6 +77,56 @@ export class CommentService {
     }
   }
 
+  async findAllWithFoodID(
+    keyWord?: string,
+    page = 1,
+    limit = 10,
+    foodID?: number
+  ) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
+
+      const where = keyWord
+        ? {
+            content: ILike(`%${keyWord}%`),
+            food_id: foodID,
+            delFlag: false,
+          }
+        : { food_id: foodID, delFlag: false };
+      const [comments, totalItems] = await this.commentRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" },
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get comments successfully";
+      result.data = comments;
+      result.pagination = {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize: limit,
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get comments failed";
+      return result;
+    }
+  }
+
   async findOne(id: number) {
     const result: ResponseInfo = new Object({
       code: HttpStatus.OK,
