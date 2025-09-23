@@ -16,8 +16,6 @@ import { CreateFoodTagDto } from "./dto/create-food-tag.dto";
 import { UpdateFoodTagDto } from "./dto/update-food-tag.dto";
 import { ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { GetUser } from "src/decorators/get-user.decorator";
-import { PayloadTokenDto } from "../auth/dto/payload-token.dto";
 
 @Controller("foodTag")
 @UseGuards(JwtAuthGuard)

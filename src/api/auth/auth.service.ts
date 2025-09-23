@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { RegisterAuthDto } from "./dto/register-auth.dto";
 import { IsNull, Repository } from "typeorm";
-import { UserRole, Users } from "src/entities";
+import { UserRole, Users } from "../../entities";
 import { compare, hashSync } from "bcryptjs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LoginAuthDto } from "./dto/login-auth.dto";

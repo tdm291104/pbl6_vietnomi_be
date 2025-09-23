@@ -1,8 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
-import { IsNotEmpty, IsString } from "class-validator";
-import e from "express";
-import { UserRole } from "src/entities";
+import { UserRole } from "../../../entities";
 
 export class GetUserDto {
   @Expose()

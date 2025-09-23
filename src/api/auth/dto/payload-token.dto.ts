@@ -1,4 +1,4 @@
-import { UserRole } from "src/entities";
+import { UserRole } from "../../../entities";
 
 export interface PayloadTokenDto {
   id: number;

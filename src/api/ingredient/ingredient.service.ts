@@ -6,10 +6,8 @@ import {
 } from "@nestjs/common";
 import { CreateIngredientDto } from "./dto/create-ingredient.dto";
 import { UpdateIngredientDto } from "./dto/update-ingredient.dto";
-import { DeepPartial, ILike, Repository } from "typeorm";
-import { Ingredients } from "src/entities";
-import { hashSync } from "bcryptjs";
-import { log } from "console";
+import { ILike, Repository } from "typeorm";
+import { Ingredients } from "../../entities";
 import { InjectRepository } from "@nestjs/typeorm";
 @Injectable()
 export class IngredientService {

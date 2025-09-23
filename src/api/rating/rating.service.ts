@@ -1,9 +1,9 @@
 import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateRatingDto } from "./dto/create-rating.dto";
 import { UpdateRatingDto } from "./dto/update-rating.dto";
-import { ILike, IsNull, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Ratings } from "src/entities/rating.entity";
+import { Ratings } from "../../entities/rating.entity";
 
 @Injectable()
 export class RatingService {
