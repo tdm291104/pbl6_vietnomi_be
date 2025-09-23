@@ -83,6 +83,35 @@ export class RatingController {
     );
   }
 
+  @Get("user-food")
+  @ApiQuery({ name: "keyWord", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "foodID", required: false, type: Number })
+  @ApiQuery({ name: "userID", required: false, type: Number })
+  findAllWithUserFood(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Query("foodID") foodID,
+    @Query("userID") userID
+  ) {
+    return this.ratingService.findAllWithUserFood(
+      keyWord,
+      Number(page),
+      Number(limit),
+      Number(foodID),
+      Number(userID)
+    );
+  }
+
+  @Get("average")
+  @ApiQuery({ name: "foodID", required: false, type: Number })
+  findAverageRatingByFoodID(@Query("foodID") foodID) {
+    return this.ratingService.findAverageRatingByFoodID(Number(foodID));
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.ratingService.findOne(+id);

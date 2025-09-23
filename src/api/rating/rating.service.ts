@@ -160,6 +160,83 @@ export class RatingService {
     }
   }
 
+  async findAllWithUserFood(
+    keyWord?: string,
+    page = 1,
+    limit = 10,
+    foodID?: number,
+    userID?: number
+  ) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
+
+      const where = { food_id: foodID, user_id: userID, delFlag: false };
+      const [ratings, totalItems] = await this.ratingRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" },
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get ratings successfully";
+      result.data = ratings;
+      result.pagination = {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize: limit,
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get ratings failed";
+      return result;
+    }
+  }
+
+  async findAverageRatingByFoodID(foodID: number) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const averageRatingQuery = await this.ratingRepository
+        .createQueryBuilder("rating")
+        .select("AVG(rating.rating)", "averageRating")
+        .where("rating.food_id = :foodID", { foodID })
+        .andWhere("rating.delFlag = :delFlag", { delFlag: false })
+        .getRawOne();
+
+      const averageRating = averageRatingQuery?.averageRating || 0;
+
+      result.message = "Get average rating successfully";
+      result.data = {
+        foodId: foodID,
+        averageRating: parseFloat(averageRating).toFixed(1), // Làm tròn đến 2 chữ số thập phân
+      };
+
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get average rating failed";
+      return result;
+    }
+  }
+
   async findOne(id: number) {
     const result: ResponseInfo = new Object({
       code: HttpStatus.OK,
