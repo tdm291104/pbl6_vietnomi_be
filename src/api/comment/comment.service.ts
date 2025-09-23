@@ -21,7 +21,7 @@ export class CommentService {
 
     try {
       const comment = this.commentRepository.create(createCommentDto);
-      comment.user_id = user_id;
+      comment.user = { id: user_id } as any;
       await this.commentRepository.save(comment);
       result.data = comment;
       result.message = "Create comment successfully";
@@ -98,15 +98,25 @@ export class CommentService {
       const where = keyWord
         ? {
             content: ILike(`%${keyWord}%`),
-            food_id: foodID,
+            food: { id: foodID },
             delFlag: false,
           }
-        : { food_id: foodID, delFlag: false };
+        : { food: { id: foodID }, delFlag: false };
+
       const [comments, totalItems] = await this.commentRepository.findAndCount({
         where,
         skip,
         take: limit,
         order: { id: "DESC" },
+        relations: ["user"],
+        select: {
+          id: true,
+          content: true,
+          user: {
+            id: true,
+            username: true,
+          },
+        },
       });
 
       const totalPages = Math.ceil(totalItems / limit);

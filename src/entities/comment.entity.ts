@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   BaseEntity,
   ForeignKey,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { Foods } from "./food.entity";
 import { Users } from "./user.entity";
@@ -15,13 +17,13 @@ export class Comments extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ForeignKey(() => Users)
-  @Column({ type: "int", nullable: false })
-  user_id: number;
+  @ManyToOne(() => Users, (user) => user.comments)
+  @JoinColumn({ name: "user_id" })
+  user: Users;
 
-  @ForeignKey(() => Foods)
-  @Column({ type: "int", nullable: false })
-  food_id: number;
+  @ManyToOne(() => Foods, (food) => food.comments)
+  @JoinColumn({ name: "food_id" })
+  food: Foods;
 
   @Column({ type: "boolean", default: false, nullable: false })
   delFlag: boolean;
