@@ -22,6 +22,7 @@ export class CommentService {
     try {
       const comment = this.commentRepository.create(createCommentDto);
       comment.user = { id: user_id } as any;
+      comment.food = { id: createCommentDto.food_id } as any;
       await this.commentRepository.save(comment);
       result.data = comment;
       result.message = "Create comment successfully";
