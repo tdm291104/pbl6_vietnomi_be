@@ -55,9 +55,8 @@ export class FoodTagController {
     return this.foodTagService.remove(+id);
   }
 
-  @Get("food")
-  @ApiQuery({ name: "id", required: false, type: Number })
-  findAllTagsByFoodId(@Query("id") id) {
+  @Get("food/:id")
+  findAllTagsByFoodId(@Param("id") id: string) {
     return this.foodTagService.findAllTagsByFoodId(+id);
   }
 
