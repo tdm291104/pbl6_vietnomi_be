@@ -65,14 +65,15 @@ export class FoodController {
   @ApiQuery({ name: "keyWord", required: false, type: String })
   @ApiQuery({ name: "page", required: false, type: Number })
   @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "userID", required: false, type: Number })
   findAllFoodFavorite(
-    @GetUser() user: PayloadTokenDto,
     @Query("keyWord") keyWord,
     @Query("page") page = 1,
-    @Query("limit") limit = 10
+    @Query("limit") limit = 10,
+    @Query("userID") userID
   ) {
     return this.foodService.findAllFoodFavorite(
-      user.id,
+      userID,
       keyWord,
       Number(page),
       Number(limit)
