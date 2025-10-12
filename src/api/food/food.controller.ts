@@ -61,6 +61,25 @@ export class FoodController {
     );
   }
 
+  @Get("favorite")
+  @ApiQuery({ name: "keyWord", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "userID", required: false, type: Number })
+  findAllFoodFavorite(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Query("userID") userID
+  ) {
+    return this.foodService.findAllFoodFavorite(
+      userID,
+      keyWord,
+      Number(page),
+      Number(limit)
+    );
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.foodService.findOne(+id);
