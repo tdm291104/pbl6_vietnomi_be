@@ -45,6 +45,25 @@ export class FoodController {
     return this.foodService.findAll(keyWord, Number(page), Number(limit));
   }
 
+  @Get("user")
+  @ApiQuery({ name: "keyWord", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "userID", required: false, type: Number })
+  findAllByUser(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Query("userID") userID
+  ) {
+    return this.foodService.findAllByUser(
+      userID,
+      keyWord,
+      Number(page),
+      Number(limit)
+    );
+  }
+
   @Get("no-posted")
   @ApiQuery({ name: "keyWord", required: false, type: String })
   @ApiQuery({ name: "page", required: false, type: Number })

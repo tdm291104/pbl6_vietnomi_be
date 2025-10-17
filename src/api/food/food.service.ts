@@ -80,6 +80,52 @@ export class FoodService {
     }
   }
 
+  async findAllByUser(userId: number, keyWord?: string, page = 1, limit = 10) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      page = Number(page);
+      limit = Number(limit);
+      const skip = (page - 1) * limit;
+
+      const where = keyWord
+        ? {
+            dish_name: ILike(`%${keyWord}%`),
+            delFlag: false,
+            posted: true,
+            user_id: userId,
+          }
+        : { delFlag: false, posted: true, user_id: userId };
+      const [foods, totalItems] = await this.foodRepository.findAndCount({
+        where,
+        skip,
+        take: limit,
+        order: { id: "DESC" }, // có thể thay đổi theo yêu cầu
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      result.message = "Get foods successfully";
+      result.data = foods;
+      result.pagination = {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize: limit,
+      };
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get foods failed";
+      return result;
+    }
+  }
+
   async findAllFoodNoPosted(keyWord?: string, page = 1, limit = 10) {
     const result: ResponseInfo = new Object({
       code: HttpStatus.OK,
@@ -186,7 +232,7 @@ export class FoodService {
         .orderBy("food.id", "DESC")
         .skip(skip)
         .take(limit)
-        .getRawMany(); // Dùng getRawMany()
+        .getMany();
 
       const totalPages = Math.ceil(totalItems / limit);
 
