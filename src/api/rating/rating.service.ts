@@ -325,4 +325,29 @@ export class RatingService {
       return result;
     }
   }
+
+  async countRatingByFood(foodId: number) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const where = { delFlag: false };
+      const totalItems = await this.ratingRepository.count({
+        where: { ...where, food_id: foodId },
+      });
+
+      result.message = "Get count ratings successfully";
+      result.data = totalItems;
+
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get ratings failed";
+      return result;
+    }
+  }
 }

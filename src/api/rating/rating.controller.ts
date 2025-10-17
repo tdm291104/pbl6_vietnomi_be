@@ -63,6 +63,17 @@ export class RatingController {
     );
   }
 
+  @Get("food/count")
+  @ApiQuery({ name: "foodID", required: false, type: Number })
+  countRatingByFood(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Query("foodID") foodID
+  ) {
+    return this.ratingService.countRatingByFood(Number(foodID));
+  }
+
   @Get("user")
   @ApiQuery({ name: "keyWord", required: false, type: String })
   @ApiQuery({ name: "page", required: false, type: Number })
