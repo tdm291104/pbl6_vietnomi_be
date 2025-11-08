@@ -32,7 +32,7 @@ export class TagService {
     }
   }
 
-  async findAll(keyWord?: string, page = 1, limit = 10) {
+  public async findAll(keyWord?: string, page = 1, limit = 10) {
     const result: ResponseInfo = new Object({
       code: HttpStatus.OK,
       message: "",
