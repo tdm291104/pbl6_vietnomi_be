@@ -62,6 +62,11 @@ export class CommentController {
     );
   }
 
+  @Get("total")
+  getTotalComments() {
+    return this.commentService.getTotalComments();
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.commentService.findOne(+id);

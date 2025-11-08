@@ -39,6 +39,16 @@ export class UserController {
     return this.userService.findAll(keyWord, Number(page), Number(limit));
   }
 
+  @Get("total")
+  getTotalUsers() {
+    return this.userService.getTotalUsers();
+  }
+
+  @Get("chart-customer-velocity")
+  getCustomerVelocity() {
+    return this.userService.getCustomerVelocity();
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(+id);

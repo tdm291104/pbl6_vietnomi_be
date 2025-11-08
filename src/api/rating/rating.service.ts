@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateRatingDto } from "./dto/create-rating.dto";
 import { UpdateRatingDto } from "./dto/update-rating.dto";
-import { Repository } from "typeorm";
+import { Between, MoreThanOrEqual, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Ratings } from "../../entities/rating.entity";
 
@@ -347,6 +347,133 @@ export class RatingService {
     } catch (error) {
       result.code = HttpStatus.INTERNAL_SERVER_ERROR;
       result.message = "Get ratings failed";
+      return result;
+    }
+  }
+
+  async getTotalRatings() {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+    }) as ResponseInfo;
+
+    try {
+      const now = new Date();
+
+      const startOfToday = new Date(now);
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const startOfYesterday = new Date(startOfToday);
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+      const totalRatings = await this.ratingRepository.count({
+        where: { delFlag: false },
+      });
+
+      const todayNewRatings = await this.ratingRepository.count({
+        where: {
+          delFlag: false,
+          createdAt: MoreThanOrEqual(startOfToday),
+        },
+      });
+
+      const yesterdayNewRatings = await this.ratingRepository.count({
+        where: {
+          delFlag: false,
+          createdAt: Between(startOfYesterday, startOfToday),
+        },
+      });
+
+      let percentageChange = 0;
+
+      if (yesterdayNewRatings > 0) {
+        percentageChange =
+          ((todayNewRatings - yesterdayNewRatings) / yesterdayNewRatings) * 100;
+      } else if (todayNewRatings > 0) {
+        percentageChange = 100;
+      } else {
+        percentageChange = 0;
+      }
+
+      const data = {
+        totalRatings: totalRatings,
+        todayNewRatings: todayNewRatings,
+        yesterdayNewRatings: yesterdayNewRatings,
+        percentageChange: parseFloat(percentageChange.toFixed(2)),
+        changeDirection: percentageChange >= 0 ? "increase" : "decrease",
+      };
+
+      result.message = "Get total ratings and daily change successfully";
+      result.data = data;
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching total ratings:", error);
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get total ratings failed";
+      return result;
+    }
+  }
+
+  async getCoreEngagementIndex() {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: [],
+    }) as ResponseInfo;
+
+    try {
+      const now = new Date();
+      const dailyData: { date: string; count: number }[] = [];
+
+      // Lặp từ 29 ngày trước đến hôm nay (i=0)
+      for (let i = 29; i >= 0; i--) {
+        // Tính toán mốc thời gian cho ngày thứ i
+        const date = new Date(now);
+        date.setDate(now.getDate() - i);
+
+        const startDate = new Date(date);
+        startDate.setHours(0, 0, 0, 0); // 00:00:00 của ngày
+
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999); // 23:59:59 của ngày
+
+        // Nếu là ngày hiện tại, end_date sẽ là thời điểm hiện tại
+        if (i === 0) {
+          endDate.setHours(
+            now.getHours(),
+            now.getMinutes(),
+            now.getSeconds(),
+            now.getMilliseconds()
+          );
+        }
+
+        // Đếm số ratings tạo trong khoảng thời gian này
+        const count = await this.ratingRepository.count({
+          where: {
+            delFlag: false,
+            createdAt: Between(startDate, endDate),
+          },
+        });
+
+        // Định dạng ngày (YYYY-MM-DD) để hiển thị trên biểu đồ
+        const dateKey = `${startDate.getFullYear()}-${(startDate.getMonth() + 1).toString().padStart(2, "0")}-${startDate.getDate().toString().padStart(2, "0")}`;
+
+        dailyData.push({
+          date: dateKey,
+          count: count,
+        });
+      }
+
+      result.message =
+        "Get new ratings count for the last 30 days successfully";
+      result.data = dailyData;
+      return result;
+    } catch (error) {
+      console.error("Error fetching daily rating data:", error);
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Failed to get daily rating data";
       return result;
     }
   }

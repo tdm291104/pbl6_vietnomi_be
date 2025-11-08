@@ -118,6 +118,16 @@ export class RatingController {
     return this.ratingService.findAverageRatingByFoodID(Number(foodID));
   }
 
+  @Get("total")
+  getTotalRatings() {
+    return this.ratingService.getTotalRatings();
+  }
+
+  @Get("chart-core-engagement-index")
+  getCoreEngagementIndex() {
+    return this.ratingService.getCoreEngagementIndex();
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.ratingService.findOne(+id);
