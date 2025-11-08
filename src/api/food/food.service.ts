@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateFoodDto } from "./dto/create-food.dto";
 import { UpdateFoodDto } from "./dto/update-food.dto";
-import { ILike, IsNull, Repository } from "typeorm";
+import { Between, ILike, IsNull, MoreThanOrEqual, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Foods } from "../../entities/food.entity";
 import { Ratings } from "src/entities/rating.entity";
@@ -455,6 +455,142 @@ export class FoodService {
         message: `Quá trình map thất bại: ${error.message}`,
         mappedCount: 0,
       };
+    }
+  }
+
+  async getTotalFoods() {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+    }) as ResponseInfo;
+
+    try {
+      const now = new Date();
+
+      const getStartOfWeek = (date: Date): Date => {
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        const startOfWeek = new Date(date.setDate(diff));
+
+        startOfWeek.setHours(0, 0, 0, 0);
+        return startOfWeek;
+      };
+
+      const startOfCurrentWeek = getStartOfWeek(new Date(now));
+
+      const startOfLastWeek = new Date(startOfCurrentWeek);
+      startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+      const totalFoods = await this.foodRepository.count({
+        where: { delFlag: false },
+      });
+
+      const currentWeekNewFoods = await this.foodRepository.count({
+        where: {
+          delFlag: false,
+          createdAt: MoreThanOrEqual(startOfCurrentWeek),
+        },
+      });
+
+      const lastWeekNewFoods = await this.foodRepository.count({
+        where: {
+          delFlag: false,
+          createdAt: Between(startOfLastWeek, startOfCurrentWeek),
+        },
+      });
+
+      let percentageChange = 0;
+
+      if (lastWeekNewFoods > 0) {
+        percentageChange =
+          ((currentWeekNewFoods - lastWeekNewFoods) / lastWeekNewFoods) * 100;
+      } else if (currentWeekNewFoods > 0) {
+        percentageChange = 100;
+      } else {
+        percentageChange = 0;
+      }
+
+      const data = {
+        totalFoods: totalFoods,
+        currentWeekNewFoods: currentWeekNewFoods,
+        lastWeekNewFoods: lastWeekNewFoods,
+        percentageChange: parseFloat(percentageChange.toFixed(2)), // Làm tròn 2 chữ số thập phân
+        changeDirection: percentageChange >= 0 ? "increase" : "decrease",
+      };
+
+      result.message = "Get total foods and weekly change successfully";
+      result.data = data;
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching total foods:", error);
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get total foods failed";
+      return result;
+    }
+  }
+
+  async getStartOfWeek(date: Date): Promise<Date> {
+    const day = date.getDay();
+    // Điều chỉnh để Thứ Hai là ngày 1 (0 là Chủ Nhật, 1 là Thứ Hai, ...)
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    const startOfWeek = new Date(date.setDate(diff));
+
+    // Đặt giờ, phút, giây về 00:00:00
+    startOfWeek.setHours(0, 0, 0, 0);
+    return startOfWeek;
+  }
+
+  async getContentGrowthSpectrum() {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: [],
+    }) as ResponseInfo;
+
+    try {
+      const weeklyData: { weekLabel: string; count: number }[] = [];
+
+      for (let i = 3; i >= 0; i--) {
+        const tempDate = new Date();
+        tempDate.setDate(tempDate.getDate() - i * 7);
+
+        const startDate = await this.getStartOfWeek(tempDate);
+
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        endDate.setHours(23, 59, 59, 999);
+
+        if (i === 0) {
+          endDate.setTime(new Date().getTime());
+        }
+
+        const count = await this.foodRepository.count({
+          where: {
+            delFlag: false,
+            createdAt: Between(startDate, endDate),
+          },
+        });
+
+        const startLabel = `${(startDate.getMonth() + 1).toString().padStart(2, "0")}/${startDate.getDate().toString().padStart(2, "0")}`;
+
+        weeklyData.push({
+          weekLabel: `Week ${i + 1} (${startLabel})`,
+          count: count,
+        });
+      }
+
+      weeklyData.reverse();
+
+      result.message = "Get new foods count for the last 4 weeks successfully";
+      result.data = weeklyData;
+      return result;
+    } catch (error) {
+      console.error("Error fetching weekly food data:", error);
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Failed to get weekly food data";
+      return result;
     }
   }
 }

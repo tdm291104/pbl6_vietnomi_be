@@ -99,6 +99,16 @@ export class FoodController {
     );
   }
 
+  @Get("total")
+  getTotalFoods() {
+    return this.foodService.getTotalFoods();
+  }
+
+  @Get("chart-content-growth-spectrum")
+  getContentGrowthSpectrum() {
+    return this.foodService.getContentGrowthSpectrum();
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.foodService.findOne(+id);
