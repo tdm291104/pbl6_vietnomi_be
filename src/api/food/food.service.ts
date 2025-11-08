@@ -5,6 +5,7 @@ import { ILike, IsNull, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Foods } from "../../entities/food.entity";
 import { Ratings } from "src/entities/rating.entity";
+import { FoodTag, Tags } from "src/entities";
 
 @Injectable()
 export class FoodService {
@@ -359,6 +360,101 @@ export class FoodService {
       result.code = HttpStatus.INTERNAL_SERVER_ERROR;
       result.message = "Delete comment failed";
       return result;
+    }
+  }
+
+  async autoMapTagsBasedOnIngredients() {
+    try {
+      // 1. Lấy tất cả Food và Tag
+      const allFoods = await Foods.find({
+        where: { delFlag: false },
+      });
+      const allTags = await Tags.find({
+        where: { delFlag: false },
+      });
+
+      // Mảng này sẽ chứa TẤT CẢ các liên kết Food-Tag cần tạo
+      const allValuesToInsert: { food: { id: number }; tag: { id: number } }[] =
+        [];
+
+      // 2. Chạy qua từng Food để kiểm tra và GOM DỮ LIỆU
+      for (const food of allFoods) {
+        // Đã đổi food.ingredients (trong code của bạn)
+        const foodIngredients = food.ingredients
+          ? food.ingredients.toLowerCase()
+          : "";
+
+        // Không cần mảng tagsToMap và creationPromises ở đây nữa.
+
+        for (const tag of allTags) {
+          const tagName = tag.name ? tag.name.toLowerCase() : "";
+
+          // Đảm bảo tên tag không rỗng và không chỉ là khoảng trắng
+          if (tagName) {
+            const escapedTagName = tagName.replace(
+              /[.*+?^${}()|[\]\\]/g,
+              "\\$&"
+            );
+
+            const customBoundaryRegex = new RegExp(
+              `(^|[\\s,;:])(${escapedTagName})([\\s,;:]|$)`,
+              "i"
+            );
+
+            // Chuẩn hóa: Đảm bảo có khoảng trắng ở đầu và cuối cho RegEx dễ khớp
+            const paddedText = ` ${foodIngredients} `;
+            if (customBoundaryRegex.test(paddedText)) {
+              // GOM dữ liệu vào mảng chính
+              allValuesToInsert.push({
+                food: { id: food.id }, // Cấu trúc cần thiết cho TypeORM/QueryBuilder
+                tag: { id: tag.id },
+              });
+            }
+          }
+        }
+      }
+
+      // 3. Thực hiện chèn hàng loạt (Bulk Insert)
+      let totalMappedCount = 0;
+      const batchSize = 1000; // Chia thành các batch để tránh giới hạn truy vấn SQL
+
+      if (allValuesToInsert.length === 0) {
+        return {
+          success: true,
+          message: "Quá trình map hoàn tất. Không tìm thấy liên kết mới nào.",
+          mappedCount: 0,
+        };
+      }
+
+      // Lặp qua các batch và thực hiện chèn
+      for (let i = 0; i < allValuesToInsert.length; i += batchSize) {
+        const batch = allValuesToInsert.slice(i, i + batchSize);
+
+        // Giả định bạn có thể truy cập FoodTagRepository (có thể là this.foodTagRepository)
+        // Tôi dùng this.foodTagRepository.repository cho mục đích ví dụ. Hãy điều chỉnh theo cấu trúc của bạn.
+        await FoodTag.createQueryBuilder() // <--- Thay thế bằng repository chính xác
+          .insert()
+          .into(FoodTag) // <--- Thay thế bằng Entity FoodTag của bạn
+          .values(batch)
+          .orIgnore() // RẤT QUAN TRỌNG: Bỏ qua lỗi nếu liên kết đã tồn tại
+          .execute();
+
+        totalMappedCount += batch.length;
+      }
+
+      // 4. Trả về kết quả
+      return {
+        success: true,
+        message: `Quá trình map hoàn tất. Đã cố gắng tạo ${totalMappedCount} liên kết mới.`,
+        mappedCount: totalMappedCount,
+      };
+    } catch (error) {
+      console.error("Lỗi trong quá trình tự động map:", error);
+      return {
+        success: false,
+        message: `Quá trình map thất bại: ${error.message}`,
+        mappedCount: 0,
+      };
     }
   }
 }

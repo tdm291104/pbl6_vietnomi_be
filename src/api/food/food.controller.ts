@@ -118,4 +118,9 @@ export class FoodController {
   remove(@Param("id") id: string) {
     return this.foodService.remove(+id);
   }
+
+  @Post("mapping-tags")
+  autoMapTagsBasedOnIngredients() {
+    return this.foodService.autoMapTagsBasedOnIngredients();
+  }
 }
