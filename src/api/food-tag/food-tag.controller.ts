@@ -60,6 +60,11 @@ export class FoodTagController {
     return this.foodTagService.findAllTagsByFoodId(+id);
   }
 
+  @Get("tag/:id")
+  findAllFoodsByTagId(@Param("id") id: string) {
+    return this.foodTagService.findAllFoodsByTagId(+id);
+  }
+
   @Put("food")
   updateTagsByFood(@Body() updatefoodTagDto: UpdateFoodTagDto) {
     return this.foodTagService.updateTagsByFood(updatefoodTagDto);
