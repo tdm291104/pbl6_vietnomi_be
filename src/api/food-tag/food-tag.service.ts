@@ -227,12 +227,12 @@ export class FoodTagService {
         .where("foodTag.food_id = :food_id", { food_id })
         .getMany();
 
-      result.message = "Get food-tags successfully";
+      result.message = "Get tags by foodId successfully";
       result.data = foodTags;
       return result;
     } catch (error) {
       result.code = HttpStatus.INTERNAL_SERVER_ERROR;
-      result.message = "Get food-tags failed";
+      result.message = "Get tags by foodId failed";
       return result;
     }
   }
@@ -276,6 +276,31 @@ export class FoodTagService {
     } catch (error) {
       result.code = HttpStatus.INTERNAL_SERVER_ERROR;
       result.message = "Update comment failed";
+      return result;
+    }
+  }
+
+  async findAllFoodsByTagId(tag_id: number) {
+    const result: ResponseInfo = new Object({
+      code: HttpStatus.OK,
+      message: "",
+      data: null,
+      pagination: null,
+    }) as ResponseInfo;
+
+    try {
+      const foodTags = await this.foodTagRepository
+        .createQueryBuilder("foodTag")
+        .leftJoinAndSelect("foodTag.food", "food")
+        .where("foodTag.tag_id = :tag_id", { tag_id })
+        .getMany();
+
+      result.message = "Get foods by tagId successfully";
+      result.data = foodTags;
+      return result;
+    } catch (error) {
+      result.code = HttpStatus.INTERNAL_SERVER_ERROR;
+      result.message = "Get foods by tagId failed";
       return result;
     }
   }
