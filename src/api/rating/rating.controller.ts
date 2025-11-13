@@ -73,7 +73,6 @@ export class RatingController {
   @ApiQuery({ name: "keyWord", required: false, type: String })
   @ApiQuery({ name: "page", required: false, type: Number })
   @ApiQuery({ name: "limit", required: false, type: Number })
-  @ApiQuery({ name: "limit", required: false, type: Number })
   @ApiQuery({ name: "userID", required: false, type: Number })
   findAllWithUserID(
     @Query("keyWord") keyWord,

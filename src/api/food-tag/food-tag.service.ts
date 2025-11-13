@@ -280,7 +280,12 @@ export class FoodTagService {
     }
   }
 
-  async findAllFoodsByTagId(tag_id: number) {
+  async findAllFoodsByTagId(
+    tag_id: number,
+    keyWord?: string,
+    page = 1,
+    limit = 10
+  ) {
     const result: ResponseInfo = new Object({
       code: HttpStatus.OK,
       message: "",
@@ -289,16 +294,40 @@ export class FoodTagService {
     }) as ResponseInfo;
 
     try {
-      const foodTags = await this.foodTagRepository
+      page = Math.max(1, Number(page));
+      limit = Math.max(1, Number(limit));
+      const skip = (page - 1) * limit;
+
+      const query = this.foodTagRepository
         .createQueryBuilder("foodTag")
         .leftJoinAndSelect("foodTag.food", "food")
-        .where("foodTag.tag_id = :tag_id", { tag_id })
-        .getMany();
+        .where("foodTag.tag_id = :tag_id", { tag_id });
+
+      if (keyWord) {
+        query.andWhere("food.name LIKE :keyWord", { keyWord: `%${keyWord}%` });
+      }
+
+      const [foodTags, total] = await query
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount();
+
+      const foods = foodTags.map((foodTag) => foodTag.food);
+
+      const totalPages = Math.ceil(total / limit);
+      const pagination: Pagination = {
+        totalItems: total,
+        totalPages: totalPages,
+        currentPage: page,
+        pageSize: limit,
+      };
 
       result.message = "Get foods by tagId successfully";
-      result.data = foodTags;
+      result.data = foods;
+      result.pagination = pagination;
       return result;
     } catch (error) {
+      console.error(error);
       result.code = HttpStatus.INTERNAL_SERVER_ERROR;
       result.message = "Get foods by tagId failed";
       return result;
