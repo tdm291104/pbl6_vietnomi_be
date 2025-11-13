@@ -61,8 +61,21 @@ export class FoodTagController {
   }
 
   @Get("tag/:id")
-  findAllFoodsByTagId(@Param("id") id: string) {
-    return this.foodTagService.findAllFoodsByTagId(+id);
+  @ApiQuery({ name: "keyWord", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  findAllFoodsByTagId(
+    @Query("keyWord") keyWord,
+    @Query("page") page = 1,
+    @Query("limit") limit = 10,
+    @Param("id") id: string
+  ) {
+    return this.foodTagService.findAllFoodsByTagId(
+      +id,
+      keyWord,
+      Number(page),
+      Number(limit)
+    );
   }
 
   @Put("food")
