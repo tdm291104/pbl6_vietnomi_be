@@ -102,6 +102,16 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "maxWorkers": 1,
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "setupFilesAfterEnv": ["<rootDir>/../test/setup.js"],
+    "reporters": [
+      "default",
+      [
+        "<rootDir>/../test/markdown-reporter.js",
+        {
+          "outputPath": "./test-report.md"
+        }
+      ]
+    ]
   }
 }
